@@ -41,7 +41,7 @@
     .logo{width:78px;height:78px;border-radius:14px;background:linear-gradient(135deg,var(--primary),#377bf0);display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:28px;box-shadow:0 10px 30px rgba(11,119,246,0.12)}
     .brand h1{font-size:30px;margin:0;letter-spacing:0.3px}
     .brand small{display:block;color:var(--muted);margin-top:4px}
-    nav .actions{display:flex;gap:12px}
+    nav .actions{display:flex;gap:12px;align-items:center}
     .btn{display:inline-flex;align-items:center;gap:8px;padding:12px 16px;border-radius:30px;border:1px solid transparent;background:var(--card);cursor:pointer;font-weight:700}
     .btn.ghost{background:transparent;border:1px solid rgba(15,23,42,0.06)}
     .btn.primary{background:linear-gradient(90deg,var(--primary),#377bf0);color:white;border:0;box-shadow:0 10px 36px rgba(59,123,240,0.14)}
@@ -110,6 +110,7 @@
 
       <nav>
         <div class="actions">
+          <!-- Keep Login / Sign up -->
           <button class="btn" id="login">Login</button>
           <button class="btn primary" id="signup">Sign up</button>
         </div>
@@ -171,28 +172,41 @@
         <a href="https://github.com/Siri-gh2" target="_blank" rel="noopener">Follow us</a>
       </div>
       <div>
-        <a href="https://siriportfolio.vercel.app/" target="_blank" rel="noopener">For More info</a>
+        <a href="https://siriportfolio.vercel.app/" target="_blank" rel="noopener">For More info </a>
       </div>
     </footer>
   </div>
 
   <script>
-    // simple navigation (replace these with your actual routes)
-    document.getElementById('signup').addEventListener('click', ()=>{
-      window.location.href = './view/signup.html';
-    });
-    document.getElementById('login').addEventListener('click', ()=>{
-      window.location.href = './view/signin.html';
-    });
-    document.getElementById('book-now').addEventListener('click', ()=>{
-      // you can route to booking page
-      window.location.href = './view/signin.html';
-    });
-    document.getElementById('browse-doctors').addEventListener('click', ()=>{
-      window.location.href = './view/doctors.html';
-    });
-    document.getElementById('btn-follow').addEventListener('click', ()=>{
-      window.open('https://github.com/Siri-gh2', '_blank');
+    // Safe DOM-ready event and guarded listeners to avoid "null" errors
+    document.addEventListener("DOMContentLoaded", () => {
+      // small helper - attach handler only if element exists
+      const safeOn = (idOrSelector, event, handler) => {
+        let el = null;
+        if (typeof idOrSelector === 'string') {
+          // prefer by id first
+          el = document.getElementById(idOrSelector) || document.querySelector(idOrSelector);
+        } else {
+          el = idOrSelector;
+        }
+        if (el) el.addEventListener(event, handler);
+        else console.warn(`Element not found for selector/id: ${idOrSelector}`);
+      };
+
+      // Navigation handlers
+      safeOn('signup', 'click', () => { window.location.href = './view/signup.html'; });
+      safeOn('login', 'click', () => { window.location.href = './view/signin.html'; });
+      safeOn('book-now', 'click', () => { window.location.href = './view/signin.html'; });
+      safeOn('btn-follow', 'click', () => { window.open('https://github.com/Siri-gh2', '_blank'); });
+
+      // Accessibility: allow Enter key on logo to go home (optional)
+      const logo = document.querySelector('.logo');
+      if (logo) {
+        logo.setAttribute('tabindex', '0');
+        logo.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') window.location.href = './index.html';
+        });
+      }
     });
   </script>
 </body>
