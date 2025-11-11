@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Patient Dashboard — MediPulse</title>
+  <link rel="stylesheet" href="../style/patient.css">
+  <style>
+    :root{--bg:#f6fafc;--card:#fff;--muted:#64748b;--accent:#0b77f6;--radius:12px}
+    body{margin:0;font-family:Inter,system-ui,Arial;background:var(--bg);color:#0f172a}
+    .navbar{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;background:linear-gradient(90deg,#fff,#f8fbff);box-shadow:0 6px 18px rgba(15,23,42,0.06)}
+    .navbar h1{margin:0;font-size:20px}
+    .patient-info{display:flex;gap:12px;align-items:center}
+    .logout-btn{padding:8px 12px;border-radius:8px;border:0;background:#fff;cursor:pointer}
+    .container{max-width:1100px;margin:18px auto;padding:0 18px}
+    .section{background:var(--card);padding:16px;border-radius:var(--radius);box-shadow:0 10px 30px rgba(12,34,64,0.04);margin-bottom:12px}
+    .appointments-container .appointment-card{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px;border-radius:10px;border:1px solid #f1f5f9;margin-bottom:10px}
+    .appointment-card b{display:block}
+    .doctors-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .doctor-card{padding:12px;background:linear-gradient(180deg,#fff,#fbfdff);border-radius:10px;box-shadow:0 8px 20px rgba(12,34,64,0.04);display:flex;flex-direction:column;gap:8px}
+    .doctor-card img{width:100%;height:140px;object-fit:cover;border-radius:8px}
+    .doctor-card .meta{font-size:14px;color:var(--muted)}
+    .btn{padding:8px 12px;border-radius:8px;border:0;cursor:pointer}
+    .btn.primary{background:linear-gradient(90deg,var(--accent),#377bf0);color:#fff}
+    .btn.ghost{background:transparent;border:1px solid rgba(15,23,42,0.06)}
+    #modalDiv{position:fixed;left:0;top:0;width:100%;height:100%;display:none;align-items:center;justify-content:center;background:rgba(11,15,30,0.45);z-index:999}
+    .modal{background:white;padding:18px;border-radius:14px;max-width:720px;width:92%}
+    .close-btn{float:right;border:0;background:transparent;font-size:20px;cursor:pointer}
+    #spinner{position:fixed;right:18px;bottom:18px;width:44px;height:44px;border-radius:50%;display:none;align-items:center;justify-content:center;background:linear-gradient(90deg,var(--accent),#377bf0);color:white;font-weight:700}
+    @media (max-width:900px){.doctors-grid{grid-template-columns:repeat(2,1fr)}}
+    @media (max-width:600px){.doctors-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <h1>MediPulse — Patient Dashboard</h1>
+    <div class="patient-info">
+      <div>
+        <div id="patientName" style="font-weight:700">Patient —</div>
+        <div id="patientEmail" style="font-size:13px;color:var(--muted)"></div>
+      </div>
+      <button id="logoutBtn" class="logout-btn">Logout</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <section class="section appointments-container">
+      <h3>Upcoming Appointments</h3>
+      <div id="appointmentsList">
+        <!-- filled by JS -->
+      </div>
+    </section>
+
+    <section class="section">
+      <h3>Book a Doctor</h3>
+      <div style="display:flex;gap:12px;margin-bottom:12px;align-items:center">
+        <input id="doctorSearch" placeholder="Search doctors by name or specialty" style="flex:1;padding:10px;border-radius:8px;border:1px solid #eef2ff">
+        <select id="specialtyFilter" style="padding:10px;border-radius:8px;border:1px solid #eef2ff">
+          <option value="all">All Specialties</option>
+        </select>
+        <button id="refreshDoctors" class="btn ghost">Refresh</button>
+      </div>
+
+      <div class="doctors-grid" id="doctorsGrid">
+        <!-- doctor cards -->
+      </div>
+    </section>
+
+    <footer style="margin-top:12px;color:var(--muted);font-size:13px">Tip: Book an appointment and view details in the modal.</footer>
+  </div>
+
+  <!-- modal -->
+  <div id="modalDiv">
+    <div class="modal" role="dialog" aria-modal="true" id="modalContent">
+      <button class="close-btn" id="modalClose">&times;</button>
+      <h3 id="modalTitle">Details</h3>
+      <div id="modalBody"></div>
+      <div style="margin-top:12px;text-align:right">
+        <button class="btn ghost" id="modalCancel">Close</button>
+        <button class="btn primary" id="modalAction">Book Appointment</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="spinner">⟳</div>
+
+  <script src="../js/patientdashboard.js"></script>
+</body>
+</html>

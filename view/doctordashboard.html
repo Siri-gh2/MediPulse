@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Doctor Dashboard — MediPulse</title>
+  <link rel="stylesheet" href="../style/doctor.css">
+  <style>
+    /* Minimal inline styles so it's usable even without external CSS */
+    :root{ --bg:#f6fafc; --card:#fff; --muted:#64748b; --accent:#0b77f6; --success:#10b981; --danger:#ef4444; --radius:12px; }
+    body{margin:0;font-family:Inter,system-ui,Arial;background:var(--bg);color:#0f172a}
+    .navbar{display:flex;justify-content:space-between;align-items:center;padding:18px 24px;background:linear-gradient(90deg,#fff,#f8fbff);box-shadow:0 6px 18px rgba(15,23,42,0.06)}
+    .navbar h1{margin:0;font-size:20px}
+    .doctor-info{display:flex;gap:12px;align-items:center}
+    .doctor-name{margin:0;font-weight:700}
+    .logout-btn{padding:8px 12px;border-radius:8px;border:0;background:#fff;box-shadow:0 6px 12px rgba(11,77,200,0.05);cursor:pointer}
+    .container{max-width:1100px;margin:22px auto;padding:0 18px}
+    .top-row{display:flex;justify-content:space-between;gap:12px;align-items:center;margin:18px 0}
+    .video-availability{display:flex;gap:12px;align-items:center}
+    .toggle{display:inline-flex;align-items:center;gap:8px}
+    .toggle input{width:36px;height:20px;appearance:none;background:#e6eefc;border-radius:999px;position:relative;cursor:pointer;outline:none}
+    .toggle input:checked{background:linear-gradient(90deg,var(--accent),#377bf0)}
+    .toggle input::after{content:'';width:16px;height:16px;background:white;border-radius:50%;position:relative;left:2px;transition:all .18s}
+    .toggle input:checked::after{transform:translateX(16px)}
+    .search-row{display:flex;gap:12px;align-items:center}
+    .search-row input, .search-row select{padding:10px 12px;border-radius:8px;border:1px solid #e6eefc;min-width:180px}
+    .appointments-container{display:grid;grid-template-columns:1fr;gap:12px;margin-top:18px}
+    .appointment-card{background:var(--card);padding:16px;border-radius:var(--radius);box-shadow:0 6px 20px rgba(12,34,64,0.04);display:flex;justify-content:space-between;gap:12px;align-items:center}
+    .appointment-left{display:flex;gap:12px;align-items:center}
+    .patient-avatar{width:56px;height:56px;border-radius:10px;background:linear-gradient(120deg,#e6f3ff,#fff);display:flex;align-items:center;justify-content:center;font-weight:700}
+    .appointment-meta{min-width:220px}
+    .appointment-meta b{display:block}
+    .appointment-actions{display:flex;gap:8px}
+    .btn{padding:8px 12px;border-radius:8px;border:0;cursor:pointer}
+    .btn.ghost{background:transparent;border:1px solid rgba(15,23,42,0.06)}
+    .btn.primary{background:linear-gradient(90deg,var(--accent),#377bf0);color:white}
+    .btn.accept{background:var(--success);color:white}
+    .btn.decline{background:var(--danger);color:white}
+    .status{padding:6px 10px;border-radius:999px;font-weight:700;font-size:13px}
+    .status.pending{background:#fef3c7;color:#92400e}
+    .status.accepted{background:#dcfce7;color:#14532d}
+    .status.declined{background:#fee2e2;color:#7f1d1d}
+    #modalDiv{position:fixed;left:0;top:0;width:100%;height:100%;display:none;align-items:center;justify-content:center;background:rgba(11,15,30,0.45);z-index:999}
+    .modal{background:white;padding:18px;border-radius:14px;max-width:720px;width:92%}
+    .modal h3{margin-top:0}
+    .modal .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .close-btn{float:right;border:0;background:transparent;font-size:20px;cursor:pointer}
+    #spinner{position:fixed;right:18px;bottom:18px;width:44px;height:44px;border-radius:50%;display:none;align-items:center;justify-content:center;background:linear-gradient(90deg,var(--accent),#377bf0);color:white;font-weight:700}
+    footer.small{margin-top:18px;color:var(--muted);font-size:13px}
+    @media (max-width:720px){ .appointment-left{flex-direction:column;align-items:flex-start} .search-row{flex-direction:column;align-items:stretch} }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <h1>MediPulse — Doctor Dashboard</h1>
+    <div class="doctor-info">
+      <div>
+        <div class="doctor-name" id="doctorName">Dr. —</div>
+        <div style="font-size:13px;color:var(--muted)" id="doctorSpecialty">Cardiology</div>
+      </div>
+      <button class="logout-btn" id="logoutBtn">Logout</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="top-row">
+      <div class="video-availability">
+        <div>
+          <div style="font-size:13px;color:var(--muted)">Video Call Availability</div>
+          <div class="toggle">
+            <input type="checkbox" id="videoToggle">
+            <label for="videoToggle" style="font-weight:700;color:#0f172a;margin-left:8px" id="videoStatusText">Off</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="search-row">
+        <input id="searchInput" placeholder="Search by patient name, reason..." />
+        <select id="filterSelect">
+          <option value="all">All</option>
+          <option value="pending">Pending</option>
+          <option value="accepted">Accepted</option>
+          <option value="declined">Declined</option>
+        </select>
+        <button class="btn ghost" id="refreshBtn">Refresh</button>
+      </div>
+    </div>
+
+    <div class="appointments-container" id="appointmentsContainer">
+      <!-- Appointment cards will render here -->
+    </div>
+
+    <footer class="small">Tip: Click <strong>View Details</strong> to see patient info; accept/decline updates status locally.</footer>
+  </div>
+
+  <!-- Modal -->
+  <div id="modalDiv">
+    <div class="modal" role="dialog" aria-modal="true" id="modalContent">
+      <button class="close-btn" id="modalClose">&times;</button>
+      <h3 id="modalTitle">Appointment Details</h3>
+      <div class="grid" id="modalBody">
+        <!-- details get injected here -->
+      </div>
+      <div style="margin-top:12px;text-align:right">
+        <button class="btn ghost" id="modalAccept">Accept</button>
+        <button class="btn decline" id="modalDecline">Decline</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="spinner">⟳</div>
+
+  <script src="../js/doctordashboard.js"></script>
+</body>
+</html>
